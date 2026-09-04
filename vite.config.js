@@ -8,5 +8,14 @@ export default defineConfig({
   build: {
     target: 'es2020',
     sourcemap: false,
+    // 两个入口都要进 dist:index.html 是成品场景,
+    // debug-structure.html 是构造检视页(按建造顺序逐单元显隐,查支承关系)。
+    // vite 默认只打包 index.html,不写这段的话调试页在构建产物里会缺席。
+    rollupOptions: {
+      input: {
+        main: 'index.html',
+        debug: 'debug-structure.html',
+      },
+    },
   },
 });

@@ -10,7 +10,17 @@
 npm install
 npm run dev        # 开发,默认 http://localhost:5173
 npm run build      # 构建到 dist/,可任意静态目录部署
+npm run preview    # 预览构建产物
 ```
+
+### 两个页面
+
+| 入口 | 用途 |
+|---|---|
+| `index.html` | 成品场景:导览、逐层、构造分解、斗拱特写、佛像探索、古今面貌、四季 |
+| `debug-structure.html` | **构造检视页**:拖「搭建」滑块按建造顺序逐单元显隐(备基定轴 → … → 塔刹),配合「层级」下拉查单层的支承关系。用于核对构件的先后与承托,不是成品界面 |
+
+两个入口都会进 `dist/`(见 `vite.config.js` 的 `rollupOptions.input` —— vite 默认只打包 `index.html`)。
 
 ## 目录结构
 

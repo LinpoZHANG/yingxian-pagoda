@@ -24,3 +24,6 @@ reference/Buddha/images/*
 !reference/Buddha/images/22_F5_groupstudy.jpg
 !reference/Buddha/images/27_all_floors_ratio.jpg
 !reference/Buddha/图片来源与版权.csv
+
+# 会话桥接日志:含账号/组织 UUID 与对话正文,禁止入库
+trajectory.jsonl

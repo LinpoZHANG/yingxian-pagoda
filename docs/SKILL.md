@@ -396,16 +396,16 @@ tanθ_檐口端 = tanθ̄ · ψ(z),   ψ(z) = z / (e^z − 1)         ψ 单调�
 | 验收项 | 状态 | 对应截图 |
 |---|---|---|
 | 纯程序化生成,无外部模型/贴图资产 | ✔ 全部几何 BufferGeometry 生成,纹理 Canvas 生成 | — |
-| 真实尺度与比例(总高 67.31 m) | ✔ 包围盒实测 0 → 67.31 | `screenshots/elevation.png` |
-| 五层六檐、明五暗四的结构表达 | ✔ 六檐 + 四道平座勾阑;分解视图可见九层 | `screenshots/elevation.png` / `exploded.png` |
-| 八角平面、柱网侧脚生起 | ✔ 内外槽双套筒 24+8 柱,侧脚 9‰、生起 60 mm | `screenshots/exploded.png` |
-| 斗拱系统(非贴图、可读构造) | ✔ 文法生成,四百余朵;英雄级转角铺作可分解 | `screenshots/bracket.png` |
-| 屋檐举折与翼角起翘 | ✔ 自定义 BufferGeometry,非圆台 | `screenshots/detail.png` |
-| 塔刹 | ✔ 七段 + 八条铁链,55.98 → 67.31 m | `screenshots/elevation.png` |
-| 材质与昼夜光照 | ✔ 程序化木/瓦/石/抹灰;昼夜缓动过渡 | `screenshots/night.png` |
-| 交互:巡航 / 自由视角 / 逐层 / 分解 / 斗拱特写 | ✔ 统一状态机调度,全部缓动过渡 | `screenshots/exploded.png` |
-| 构件拾取与信息卡 | ✔ Raycaster + InstancedMesh instanceId 映射 | `screenshots/detail.png` |
-| 牌匾六方(程序化文字) | ✔ Canvas2D 现画,系统字体,无外部图片;配色逐方取自实景照 | `screenshots/south-elevation-plaques.png` |
-| 古今面貌(立面材料演变) | ✔ 墙体、开口与面层三者同变;2 秒解释动画,面层走渐变遮罩 | `screenshots/r42-era-openings.png`(斜向面开口对照)/ `r43-era-modern.png` |
+| 真实尺度与比例(总高 67.31 m) | ✔ 包围盒实测 0 → 67.31 | `screenshots/ScreenShot_2026-09-04_144051_311.png`(春·全景) |
+| 五层六檐、明五暗四的结构表达 | ✔ 六檐 + 四道平座勾阑;剖透视可见九层 | `screenshots/ScreenShot_2026-09-04_144051_311.png`(六檐外观)/ `screenshots/ScreenShot_2026-09-04_144336_626.png`(剖透视见九层叠柱) |
+| 八角平面、柱网侧脚生起 | ✔ 内外槽双套筒 24+8 柱,侧脚 9‰、生起 60 mm | `screenshots/ScreenShot_2026-09-04_144243_686.png`(分层建造鸟瞰,八角柱网可读) |
+| 斗拱系统(非贴图、可读构造) | ✔ 文法生成,四百余朵;英雄级转角铺作可分解 | `screenshots/ScreenShot_2026-09-04_144312_487.png`(转角铺作分解,构件逐一标注) |
+| 屋檐举折与翼角起翘 | ✔ 自定义 BufferGeometry,非圆台 | `screenshots/ScreenShot_2026-09-04_144705_591.png`(檐口特写:举折、翼角、椽飞、瓦垄) |
+| 塔刹 | ✔ 七段 + 八条铁链,55.98 → 67.31 m | `screenshots/ScreenShot_2026-09-04_144051_311.png`(刹身与八条铁链) |
+| 材质与昼夜光照 | ✔ 程序化木/瓦/石/抹灰;昼夜缓动过渡 | `screenshots/ScreenShot_2026-09-04_144157_610.png`(冬夜·室内透光)/ `screenshots/ScreenShot_2026-09-04_144628_655.png`(夜间屋架) |
+| 交互:巡航 / 自由视角 / 逐层 / 分解 / 斗拱特写 | ✔ 统一状态机调度,全部缓动过渡 | `screenshots/ScreenShot_2026-09-04_144243_686.png`(神游建造)/ `screenshots/ScreenShot_2026-09-04_144312_487.png`(斗拱特写) |
+| 构件拾取与信息卡 | ✔ Raycaster + InstancedMesh instanceId 映射 | `screenshots/ScreenShot_2026-09-04_144312_487.png`(构件标注)/ `screenshots/ScreenShot_2026-09-04_144538_913.png`(信息卡) |
+| 牌匾六方(程序化文字) | ✔ Canvas2D 现画,系统字体,无外部图片;配色逐方取自实景照 | `screenshots/ScreenShot_2026-09-04_144857_081.png`(天宮高聳匾在位) |
+| 古今面貌(立面材料演变) | ✔ 墙体、开口与面层三者同变;2 秒解释动画,面层走渐变遮罩 | `screenshots/ScreenShot_2026-09-04_144446_847.png`(古)/ `screenshots/ScreenShot_2026-09-04_144512_145.png`(今),同机位对照 |
 | 键盘可达 / reduced-motion / 移动端 | ✔ 0–5、空格、N、X、B、H;媒体查询降级 | — |
 | 资料来源与人工调整记录 | ✔ docs/references.md、docs/adjustments.md | — |

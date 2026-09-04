@@ -252,6 +252,19 @@
 
 CSS 侧:`hud.css` 1043 → 1021 行,死选择器归零(剩 6 个是把 `#a9614a` 这类**颜色值**误判成 id 选择器)。
 
+**一处连锁**:删掉 `fanBlend`(`cornerWeight` 的别名)之后,`cornerWeight` 在 `eavecorner.js`
+就没了使用点,于是**新生出一个死 import**。
+> **删死代码会造出新的死代码 —— 清理之后要再扫一遍,一次不够。**
+
+**`debug-structure.html` 随包发布(资料方裁决)**,故有两件事要办:
+- 它 import 的 `DEFAULT_BUILD_PROGRESS` / `applyBuildState` / `getPhaseLabel` / `rememberBuildState`
+  必须完好 —— 本轮收窄 `buildTourLogic.js` 的 export 时这四个没动,已逐个验证,
+  并按进度 0.04→1.0 实跑,可见 mesh 0 → 3635 件(= 整塔总数),阶段标签正确;
+- vite **默认只打包 `index.html`**,不写 `rollupOptions.input` 的话调试页在 `dist/` 里会缺席。
+  已补多入口,`dist/` 现含两个 html,并从 `dist/` 经 preview 实测过渲染。
+  > 初次截图只有 39 KB、画面不见塔,险些判成构建坏了 —— 实际是进度停在初始的 4%
+  > 「备基定轴」,此时**本来就一件构件都不该有**。仍是那条:**截图要看内容,更要看它该是什么样**。
+
 ---
 
 ## 六、斗拱可读性:三条成因,三级修正

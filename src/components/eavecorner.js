@@ -22,7 +22,7 @@ import {
 import { fen, SECTION, PART } from '../data/caifen.js';
 import { ROOF_BUILDUP, ROOF } from '../data/pagodaParams.js';
 import { OCT_N } from '../assembly/octagon.js';
-import { createRoofSection, cornerWeight, chordSag, SIN_HALF, shengQiAt } from './roof.js';
+import { createRoofSection, chordSag, SIN_HALF, shengQiAt } from './roof.js';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
 /**
