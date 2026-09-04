@@ -218,6 +218,42 @@
 
 ---
 
+## 五附四、发版前的死代码清理
+
+发 git 前扫了一遍。判据分三档,**不能只看「有没有人 import」** ——
+`scratchpad/` 里的断言探针也从 `src/` 取符号,它们不在项目树里,却是断言套件的接口。
+
+| 档 | 判据 | 处置 |
+|---|---|---|
+| A | 只被 scratchpad 探针使用(12 项) | **保留** —— 删了断言套件就断 |
+| B | 仅在本文件内部使用(16 项) | **去掉 export**,代码不动 |
+| C | 全项目 + 探针都没用到(13 项) | 逐个判断,只删确认无用的 3 个 |
+
+**删掉的**:
+- 8 处未使用的 `import`(`GONGYAN_TOP` / `apothem` / `Box3` / `ROOF_BUILDUP`×2 / `Vector3` / `Group` / `Vector2`);
+- `fanBlend` —— `cornerWeight` 的纯别名,一行,无人用;
+- `offTick` —— `onTick` 本来就返回解绑函数,这是第二条路;
+- `getSupportGate(level, role)` —— 靠 `approxKey` 猜单元的旧版,已被 `getBuildSupportGate(obj)` 取代;
+- 一套 `<defs><marker id="statue-guide-arrow">` 的 SVG 箭头定义 + `.statue-guide-line/.dot/.label/.arrow`
+  四条 CSS —— 佛像引线早改成只画楼层标记盘,那套折线画法整体废弃,箭头 marker 定义了却没有任何元素引用。
+
+**C 档里留下的 10 项,以及为什么不删**:
+
+| 符号 | 留的理由 |
+|---|---|
+| `circumRadius` | 「剪影半宽是面心量,÷cos22.5° 才是角点」——这条反复踩坑的规则的具名接口。删了下次又去手写 `/ OCT_COS` |
+| `bracketBottom` | 与探针在用的 `bracketTotalHeight` 配对 |
+| `isStudyMaterials` | 与 `setStudyMaterials` 配对的状态查询 |
+| `octagonEdges` / `octagonLoop` | 八角几何库的公共 API,与在用的其余函数同级 |
+| `K_ANG` / `CLEAR_HEIGHT` / `PLAQUES_PENDING` / `FLOOR_TOTALS` / `MUD_MATERIALS` | **考证数据**。代码不用不等于资料无用 —— `PLAQUES_PENDING` 是第二批待定牌匾的资料 |
+
+> **删函数和删数据是两回事。**没被调用的函数是死代码;没被调用的数据表是还没用上的资料,
+> 删掉它等于把考证的结果一起删了。
+
+CSS 侧:`hud.css` 1043 → 1021 行,死选择器归零(剩 6 个是把 `#a9614a` 这类**颜色值**误判成 id 选择器)。
+
+---
+
 ## 六、斗拱可读性:三条成因,三级修正
 
 「斗拱粘连、可读性很差」是反复被指出的一条。归因不是一条:
