@@ -1,0 +1,26 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+
+# 资料原件不入库:受版权保护,引用而非分发(见 LICENSE / docs/references.md)。
+# 例外是代码实际引用的 12 张造像图与它们的来源/版权表 ——
+# 不提交它们,克隆下来 `npm run build` 会因找不到文件而失败。
+reference/*
+!reference/Buddha/
+reference/Buddha/*
+!reference/Buddha/images/
+reference/Buddha/images/*
+!reference/Buddha/images/01_F1_main_buddha.png
+!reference/Buddha/images/05_F2_group.png
+!reference/Buddha/images/06_F3_group.png
+!reference/Buddha/images/07_F4_group.png
+!reference/Buddha/images/08_F5_group.png
+!reference/Buddha/images/09_all_floors_3d.jpg
+!reference/Buddha/images/11_F1_murals.jpg
+!reference/Buddha/images/12_F2_groupstudy.jpg
+!reference/Buddha/images/17_F3_groupstudy.jpg
+!reference/Buddha/images/20_F4_groupstudy.jpg
+!reference/Buddha/images/22_F5_groupstudy.jpg
+!reference/Buddha/images/27_all_floors_ratio.jpg
+!reference/Buddha/图片来源与版权.csv

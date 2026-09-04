@@ -1,0 +1,20 @@
+{
+  "name": "yingxian-pagoda",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Web3D 应县木塔 —— 基于 Three.js 的程序化生成场景(无外部模型资产)",
+  "author": "Linpo ZHANG",
+  "license": "UNLICENSED",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "^0.168.0"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0"
+  }
+}

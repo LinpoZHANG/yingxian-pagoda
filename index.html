@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="author" content="Linpo ZHANG" />
+  <meta name="copyright" content="© 2026 Linpo ZHANG. All rights reserved." />
+  <meta name="description" content="应县木塔(佛宫寺释迦塔,1056)Web3D 程序化生成场景 —— 全部几何与纹理由代码生成,无外部模型与贴图资产。" />
+  <title>应县木塔 · 千年木构 | Web3D 程序化生成</title>
+  <link rel="stylesheet" href="./src/styles/hud.css" />
+</head>
+<body>
+  <!--
+    页面结构约定(HUD 由 src/ui/ 动态挂载到以下容器):
+    #app        WebGL canvas 挂载点(全屏)
+    #hud        叙事界面层(标题、逐层导航、状态切换、信息面板)
+    #loading    首屏加载指示(几何生成期间显示)
+  -->
+  <div id="app"></div>
+  <div id="hud"></div>
+  <div id="loading"></div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

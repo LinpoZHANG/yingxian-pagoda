@@ -1,0 +1,1021 @@
+/* styles/hud.css —— HUD 样式
+ * ───────────────────────────────────────────────────────────────
+ * 设计基调取自建筑本体:陈年木色 / 青瓦灰 / 抹灰暖白,夜色下暗金点缀。
+ * 刻意避开通用模板腔:不用全大写眉标、不用中点串联的 meta 行、
+ * 不用等宽字体堆数据标签。唯一「放胆之处」= 左上角竖排题字。
+ * 可达性:键盘可聚焦、reduced-motion 降级、移动端改底部抽屉。
+ */
+
+:root {
+  /* 取自塔身的色板 */
+  --ink:        #14110e;   /* 檐下最深的影 */
+  --ink-soft:   #241d18;
+  --wood:       #7a3d2c;   /* 千年氧化的暗红褐 */
+  --wood-lit:   #a9614a;
+  --tile:       #79838a;   /* 青瓦灰 */
+  --plaster:    #e6ddca;   /* 抹灰暖白 */
+  --plaster-dim:#b6ad9c;
+  --gold:       #c9a227;   /* 夜色下的暗金 */
+
+  --panel-bg:   color-mix(in srgb, var(--ink) 84%, transparent);
+  --panel-line: color-mix(in srgb, var(--plaster) 16%, transparent);
+
+  --serif: "Songti SC", "Source Han Serif SC", "Noto Serif SC", "SimSun", "STSong", serif;
+  --sans:  system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB",
+           "Microsoft YaHei", sans-serif;
+
+  --gap: 14px;
+  --radius: 3px;
+  --dur: .45s;
+}
+
+html, body { margin: 0; height: 100%; overflow: hidden; background: #1a1917; }
+body { font-family: var(--sans); color: var(--plaster); }
+#app { position: fixed; inset: 0; }
+#hud { position: fixed; inset: 0; pointer-events: none; z-index: 2; }
+#hud > .hud-title,
+#hud > .hud-panel,
+#hud > .hud-bar,
+#hud > .camera-tuner[data-open],
+#hud > .image-lightbox[data-open],
+#hud > .hud-part[data-open],
+#hud > .hud-sheet[data-open] { pointer-events: auto; }
+#hud > .hud-labels { pointer-events: none; }
+#hud > .hud-statue-guides { pointer-events: none; }
+#hud > .hud-craft-entry[data-open] { pointer-events: auto; }
+#hud[data-tune] > .hud-panel,
+#hud[data-tune] > .hud-bar,
+#hud[data-tune] > .hud-part,
+#hud[data-tune] > .hud-statue-guides {
+  opacity: 0;
+  pointer-events: none;
+}
+#hud[data-tune] > .camera-tuner[data-open] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 首屏加载 ─────────────────────────────────────────────── */
+#loading {
+  position: fixed; inset: 0; z-index: 9;
+  display: grid; place-content: center;
+  background: #14110e; color: var(--plaster-dim);
+  font-family: var(--serif); font-size: 15px; letter-spacing: .28em;
+  transition: opacity var(--dur) ease;
+}
+#loading:empty { display: none; }
+#loading[data-error] { color: #e0a08a; letter-spacing: normal; font-family: var(--sans); padding: 2rem; }
+
+/* 竖排题字 ─────────────────────────────────────────────── */
+.hud-title {
+  position: absolute; top: clamp(20px, 4vh, 44px); left: clamp(18px, 3vw, 40px);
+  z-index: 2;
+  display: flex; align-items: flex-start; gap: 12px;
+  /* 白天的背景是亮天与雪地(实测 L189~220),浅奶油题字(L222)几乎没有对比,
+     全靠深色投影撑着 —— 所以白天用深字配浅描边,夜景再换回浅字配深描边。 */
+  text-shadow: 0 1px 3px rgba(255,255,255,.85), 0 2px 16px rgba(255,255,255,.55);
+}
+#hud[data-time="night"] .hud-title {
+  text-shadow: 0 2px 18px rgba(0,0,0,.75);
+}
+.hud-title h1 {
+  writing-mode: vertical-rl; text-orientation: upright;
+  margin: 0; font-family: var(--serif); font-weight: 500;
+  font-size: clamp(30px, 4.4vw, 52px); line-height: 1.06;
+  letter-spacing: .16em; color: var(--ink);
+}
+#hud[data-time="night"] .hud-title h1 { color: var(--plaster); }
+.hud-title .meta {
+  writing-mode: vertical-rl;
+  /* 13px → 17px;字号一大,.34em 的字距就显散,收到 .26em */
+  font-family: var(--serif); font-size: 17px; letter-spacing: .26em;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--ink) 88%, transparent); margin-top: 6px;
+}
+#hud[data-time="night"] .hud-title .meta {
+  color: color-mix(in srgb, var(--plaster) 88%, transparent);
+}
+.hud-title .meta b { font-weight: 500; color: #8a6a10; }
+#hud[data-time="night"] .hud-title .meta b { color: var(--gold); }
+
+/* 叙事面板 ─────────────────────────────────────────────── */
+.hud-panel {
+  position: absolute; top: clamp(20px, 4vh, 44px); right: clamp(18px, 3vw, 40px);
+  z-index: 2;
+  width: min(336px, 34vw);
+  background: var(--panel-bg);
+  backdrop-filter: blur(14px) saturate(1.1);
+  border: 1px solid var(--panel-line);
+  border-radius: var(--radius);
+  padding: 20px 20px 18px;
+  transition: opacity var(--dur) ease, transform var(--dur) ease;
+}
+.hud-panel h2 {
+  margin: 0 0 2px; font-family: var(--serif); font-weight: 500;
+  font-size: 20px; letter-spacing: .10em;
+}
+.hud-panel .lead {
+  margin: 8px 0 10px; font-size: 13.5px; line-height: 1.75;
+  color: var(--gold);
+}
+.hud-panel .body {
+  margin: 0; font-size: 13px; line-height: 1.95; color: var(--plaster-dim);
+  text-align: justify;
+}
+.hud-panel .facts {
+  margin: 16px 0 0; padding-top: 13px;
+  border-top: 1px solid var(--panel-line);
+  display: grid; gap: 7px;
+}
+.hud-panel .facts div {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+  font-size: 12.5px;
+}
+.hud-panel .facts dt { color: var(--plaster-dim); }
+.hud-panel .facts dd {
+  margin: 0; font-family: var(--serif); font-size: 14px; color: var(--plaster);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 构件信息卡 ───────────────────────────────────────────── */
+.hud-part {
+  position: absolute; left: clamp(18px, 3vw, 40px); bottom: 104px;
+  width: min(320px, 40vw);
+  background: var(--panel-bg);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--panel-line);
+  border-left: 2px solid var(--wood-lit);
+  border-radius: var(--radius);
+  padding: 15px 17px 16px;
+  opacity: 0; transform: translateY(8px); pointer-events: none;
+  transition: opacity .3s ease, transform .3s ease;
+}
+.hud-part[data-open] { opacity: 1; transform: none; pointer-events: auto; }
+.hud-part[data-kind="statue"] {
+  z-index: 5;
+  left: auto;
+  right: clamp(32px, 3vw, 56px);
+  top: clamp(30px, 4vh, 46px);
+  bottom: clamp(78px, 8vh, 92px);
+  width: clamp(380px, 25vw, 460px);
+  height: auto;
+  overflow: hidden;
+  border-left: 1px solid var(--panel-line);
+  border-right: 2px solid var(--gold);
+  padding: 22px 26px 30px;
+  box-shadow: 0 18px 42px rgba(0,0,0,.32);
+}
+.hud-part.statue-detail-card {
+  z-index: 5;
+  left: clamp(32px, 3vw, 56px);
+  right: auto;
+  top: clamp(30px, 4vh, 46px);
+  bottom: clamp(78px, 8vh, 92px);
+  width: clamp(380px, 25vw, 460px);
+  height: auto;
+  overflow: auto;
+  border-left: 2px solid color-mix(in srgb, var(--gold) 70%, transparent);
+  border-right: 1px solid var(--panel-line);
+  background: color-mix(in srgb, var(--ink) 86%, transparent);
+  padding: 22px 26px 30px;
+  box-shadow: 0 18px 42px rgba(0,0,0,.34);
+}
+.hud-part.statue-detail-card:not([data-open]) {
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+}
+.hud-part .statue-detail-body h3 {
+  padding-right: 22px;
+}
+.hud-part h3 {
+  margin: 0; font-family: var(--serif); font-size: clamp(22px, 1.65vw, 29px); font-weight: 500;
+  letter-spacing: .08em;
+}
+.hud-part .role {
+  font-size: 12px; color: var(--gold); letter-spacing: .2em; margin-left: 11px;
+}
+.hud-part .role:empty { display: none; }
+.hud-part p {
+  margin: 13px 0 0; font-size: 14.5px; line-height: 2.05; color: var(--plaster-dim);
+  white-space: pre-line;   /* 铺作卡片会在正文后另起一行附「此朵等级」 */
+}
+.hud-part .part-visual-slot:empty { display: none; }
+.hud-part .part-section-slot:empty { display: none; }
+.hud-part .statue-visual {
+  margin: 15px 0 15px;
+  border: 1px solid var(--panel-line);
+  background:
+    linear-gradient(135deg, rgba(230,221,202,.08), rgba(122,61,44,.08)),
+    rgba(20,17,14,.34);
+  border-radius: 2px;
+  padding: 9px 10px 10px;
+}
+.hud-part .statue-visual svg {
+  display: block; width: 100%; height: 140px;
+}
+.hud-part .statue-visual figcaption {
+  margin-top: 8px; font-size: 12.5px; line-height: 1.65; color: var(--plaster-dim);
+}
+.hud-part .statue-visual .altar {
+  fill: rgba(166,97,74,.22); stroke: rgba(230,221,202,.55); stroke-width: .8;
+}
+.hud-part .statue-visual .axis {
+  stroke: rgba(230,221,202,.18); stroke-width: .55; stroke-dasharray: 2 2;
+}
+.hud-part .statue-visual .level-line {
+  stroke: rgba(230,221,202,.32); stroke-width: .7;
+}
+.hud-part .statue-visual .dot {
+  fill: #c9a227; stroke: rgba(20,17,14,.72); stroke-width: .7;
+}
+.hud-part .statue-visual .dot.main { fill: #f0c56a; }
+.hud-part .statue-visual .dot.standing { fill: #d8b16b; }
+.hud-part .statue-visual .dot.attendant { fill: #a9614a; }
+.hud-part .statue-visual .dot.mural { fill: #8aa091; }
+.hud-part .statue-visual text {
+  fill: var(--plaster-dim); font-size: 5px; text-anchor: middle;
+  font-family: var(--serif);
+}
+.hud-part .statue-visual .floor-label,
+.hud-part .statue-visual .count-label {
+  fill: var(--gold); font-size: 5.6px;
+}
+.hud-part .statue-visual .floor-label { text-anchor: end; }
+.hud-part .statue-visual .count-label { text-anchor: start; }
+.hud-part .statue-image-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 18px 0 16px;
+}
+.hud-part .statue-image {
+  margin: 0;
+  border: 1px solid var(--panel-line);
+  background: rgba(20,17,14,.36);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.hud-part .statue-image img {
+  display: block;
+  width: 100%;
+  height: 142px;
+  object-fit: cover;
+  cursor: zoom-in;
+}
+.hud-part .statue-image img:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+.hud-part .statue-image figcaption {
+  padding: 7px 9px 8px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--plaster-dim);
+}
+.hud-part .statue-floor-sections {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+.hud-part .statue-floor-card {
+  border: 1px solid color-mix(in srgb, var(--plaster) 14%, transparent);
+  border-left: 2px solid color-mix(in srgb, var(--gold) 76%, transparent);
+  border-radius: 2px;
+  background: rgba(230,221,202,.045);
+  padding: 11px 12px 12px;
+  scroll-margin-top: 18px;
+}
+.hud-part .statue-floor-card[data-selected] {
+  background: rgba(201,162,39,.085);
+  border-color: color-mix(in srgb, var(--gold) 42%, transparent);
+}
+.hud-part .statue-floor-sections.is-compact {
+  gap: 0;
+  margin-top: 16px;
+  border: 1px solid color-mix(in srgb, var(--plaster) 13%, transparent);
+  background: rgba(20,17,14,.2);
+}
+.hud-part .statue-floor-sections.is-compact .statue-floor-card {
+  min-height: 68px;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--plaster) 13%, transparent);
+  background: transparent;
+  transition: background .06s ease, border-color .06s ease;
+}
+.hud-part .statue-floor-sections.is-compact .statue-floor-card:hover {
+  background: rgba(230,221,202,.085);
+  border-bottom-color: color-mix(in srgb, var(--gold) 34%, transparent);
+}
+.hud-part .statue-floor-sections.is-compact .statue-floor-card:last-child { border-bottom: 0; }
+.hud-part .statue-floor-sections.is-compact .statue-floor-card[data-selected] {
+  background: color-mix(in srgb, var(--plaster) 86%, transparent);
+}
+.hud-part .statue-floor-sections.is-compact .statue-floor-detail { margin-top: 8px; }
+.hud-part .statue-floor-sections.is-compact .statue-floor-text {
+  margin: 0;
+  font-size: 11.8px;
+  line-height: 1.68;
+}
+.hud-part .statue-floor-sections.is-compact .statue-floor-facts {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 0;
+  padding-top: 6px;
+}
+.hud-part .statue-floor-head {
+  width: 100%;
+  border: 0;
+  background: none;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.hud-part .statue-floor-sections.is-compact .statue-floor-head {
+  min-height: 68px;
+  padding: 0 16px;
+  transition: color .06s ease;
+}
+.hud-part .statue-floor-head b {
+  flex: none;
+  color: var(--gold);
+  font-family: var(--serif);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .14em;
+}
+.hud-part .statue-floor-head h4 {
+  flex: 1;
+  margin: 0;
+  color: var(--plaster);
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: .06em;
+  transition: color .06s ease;
+}
+.hud-part .statue-floor-plan {
+  flex: none;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+}
+.hud-part .statue-floor-plan svg {
+  display: block;
+  width: 42px;
+  height: 42px;
+}
+.hud-part .statue-floor-plan .plan-altar {
+  fill: rgba(166,97,74,.18);
+  stroke: color-mix(in srgb, var(--plaster) 36%, transparent);
+  stroke-width: 1;
+}
+.hud-part .statue-floor-plan .plan-axis {
+  stroke: color-mix(in srgb, var(--plaster) 14%, transparent);
+  stroke-width: .8;
+}
+.hud-part .statue-floor-plan .plan-dot {
+  fill: color-mix(in srgb, var(--gold) 74%, var(--plaster));
+  stroke: rgba(20,17,14,.65);
+  stroke-width: .7;
+}
+.hud-part .statue-floor-plan .plan-dot.main {
+  fill: #f0c56a;
+}
+.hud-part .statue-floor-plan .plan-dot.attendant {
+  fill: color-mix(in srgb, var(--wood-lit) 80%, var(--gold));
+}
+.hud-part .statue-floor-index {
+  flex: none;
+  min-width: 42px;
+  color: color-mix(in srgb, var(--plaster) 72%, transparent);
+  font-family: "Noto Serif", Georgia, serif;
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+  border-left: 1px solid color-mix(in srgb, var(--plaster) 14%, transparent);
+  padding-left: 16px;
+  transition: color .06s ease, border-color .06s ease;
+}
+.hud-part .statue-floor-copy {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+.hud-part .statue-floor-copy em {
+  color: color-mix(in srgb, var(--plaster-dim) 82%, transparent);
+  font-style: normal;
+  font-size: 12.5px;
+  line-height: 1.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color .06s ease;
+}
+.hud-part .statue-floor-sections.is-compact .statue-floor-card:hover .statue-floor-index {
+  color: color-mix(in srgb, var(--plaster) 92%, var(--gold));
+  border-left-color: color-mix(in srgb, var(--gold) 38%, transparent);
+}
+.hud-part .statue-floor-sections.is-compact .statue-floor-card:hover .statue-floor-head h4 {
+  color: color-mix(in srgb, var(--plaster) 90%, var(--gold));
+}
+.hud-part .statue-floor-sections.is-compact .statue-floor-card:hover .statue-floor-copy em {
+  color: color-mix(in srgb, var(--gold) 78%, var(--plaster));
+}
+.hud-part .statue-floor-sections.is-compact .statue-floor-card:hover .statue-floor-plan .plan-altar {
+  fill: rgba(201,162,39,.11);
+  stroke: color-mix(in srgb, var(--gold) 50%, transparent);
+}
+.hud-part .statue-floor-sections.is-compact .statue-floor-card:hover .statue-floor-plan .plan-dot {
+  fill: color-mix(in srgb, var(--gold) 88%, var(--plaster));
+}
+.hud-part .statue-floor-card[data-selected] .statue-floor-plan,
+.hud-part .statue-floor-card[data-selected] .statue-floor-index,
+.hud-part .statue-floor-card[data-selected] .statue-floor-head h4,
+.hud-part .statue-floor-card[data-selected] .statue-floor-copy em {
+  color: var(--ink);
+}
+.hud-part .statue-floor-card[data-selected] .statue-floor-plan .plan-altar {
+  fill: rgba(20,17,14,.08);
+  stroke: rgba(20,17,14,.35);
+}
+.hud-part .statue-floor-card[data-selected] .statue-floor-plan .plan-axis {
+  stroke: rgba(20,17,14,.16);
+}
+.hud-part .statue-floor-card[data-selected] .statue-floor-plan .plan-dot {
+  stroke: rgba(20,17,14,.6);
+}
+.hud-part .statue-floor-toggle {
+  flex: none;
+  color: var(--gold);
+  font-size: 11px;
+  letter-spacing: .12em;
+}
+.hud-part .statue-floor-subtitle {
+  margin: 4px 0 0;
+  color: var(--gold);
+  font-size: 13px;
+  line-height: 1.65;
+}
+.hud-part .statue-floor-text,
+.hud-part .statue-floor-note {
+  margin: 14px 0 0;
+  font-size: 14px;
+  line-height: 2.0;
+  color: var(--plaster-dim);
+  text-align: justify;
+}
+.hud-part .statue-floor-note {
+  color: color-mix(in srgb, var(--plaster) 78%, transparent);
+}
+.hud-part .statue-floor-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 18px;
+  margin: 16px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--panel-line);
+}
+.hud-part .statue-floor-facts div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+}
+.hud-part .statue-floor-facts dt { color: var(--plaster-dim); }
+.hud-part .statue-floor-facts dd {
+  margin: 0;
+  color: var(--plaster);
+  font-family: var(--serif);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.hud-statue-guides {
+  z-index: 4;
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity .25s ease;
+}
+.hud-statue-guides[data-open] { opacity: 1; }
+.statue-floor-marker {
+  cursor: pointer;
+  pointer-events: auto;
+  transition: opacity .2s ease;
+}
+.statue-floor-marker:hover .statue-marker-disc,
+.statue-floor-marker[data-selected="true"] .statue-marker-disc {
+  fill: color-mix(in srgb, var(--gold) 76%, var(--ink));
+  stroke: color-mix(in srgb, var(--plaster) 82%, var(--gold));
+}
+.statue-marker-tick {
+  stroke: color-mix(in srgb, var(--gold) 56%, var(--ink));
+  stroke-width: 1.1;
+  vector-effect: non-scaling-stroke;
+}
+.statue-marker-disc {
+  fill: rgba(36,29,24,.62);
+  stroke: color-mix(in srgb, var(--gold) 62%, transparent);
+  stroke-width: 1.4;
+  filter: drop-shadow(0 2px 5px rgba(0,0,0,.56));
+}
+.statue-marker-text {
+  fill: color-mix(in srgb, var(--plaster) 86%, var(--gold));
+  font: 14px "Noto Serif", Georgia, serif;
+  text-anchor: middle;
+  font-variant-numeric: tabular-nums;
+}
+.statue-floor-marker[data-selected="true"] .statue-marker-text {
+  fill: var(--plaster);
+}
+.hud-part .part-facts {
+  margin: 18px 0 0; padding-top: 14px;
+  border-top: 1px solid var(--panel-line);
+  display: grid; gap: 9px;
+}
+.hud-part .part-facts:empty,
+.hud-part .source:empty { display: none; }
+.hud-part .part-facts div {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+  font-size: 13.5px;
+}
+.hud-part .part-facts dt { color: var(--plaster-dim); }
+.hud-part .part-facts dd {
+  margin: 0; color: var(--plaster); font-family: var(--serif);
+  font-variant-numeric: tabular-nums; text-align: right;
+}
+.hud-part .source {
+  margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--panel-line);
+  font-size: 12.5px; line-height: 1.75; color: color-mix(in srgb, var(--plaster-dim) 78%, transparent);
+}
+.hud-part > button {
+  position: absolute; top: 9px; right: 9px;
+  background: none; border: 0; color: var(--plaster-dim);
+  font-size: 17px; line-height: 1; cursor: pointer; padding: 4px;
+}
+.hud-part > button:hover { color: var(--plaster); }
+
+/* 佛像参考图大图层 ─────────────────────────────────────── */
+.image-lightbox {
+  z-index: 8;
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 44px;
+  background: rgba(12,10,8,.78);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease;
+}
+.image-lightbox[data-open] {
+  opacity: 1;
+  pointer-events: auto;
+}
+.image-lightbox-inner {
+  position: relative;
+  margin: 0;
+  max-width: min(1120px, 88vw);
+  max-height: 86vh;
+  border: 1px solid var(--panel-line);
+  border-radius: var(--radius);
+  background: var(--ink-soft);
+  box-shadow: 0 18px 48px rgba(0,0,0,.44);
+  overflow: hidden;
+}
+.image-lightbox-inner img {
+  display: block;
+  max-width: 100%;
+  max-height: calc(86vh - 42px);
+  object-fit: contain;
+  background: #100d0a;
+}
+.image-lightbox-inner figcaption {
+  min-height: 18px;
+  padding: 9px 44px 10px 12px;
+  color: var(--plaster-dim);
+  font-size: 12px;
+  line-height: 1.45;
+}
+.image-lightbox-close {
+  position: absolute;
+  right: 8px;
+  bottom: 6px;
+  border: 0;
+  background: none;
+  color: var(--plaster-dim);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 5px 7px;
+}
+.image-lightbox-close:hover { color: var(--plaster); }
+
+/* 底部功能条 ───────────────────────────────────────────── */
+.hud-bar {
+  position: absolute; left: 50%; bottom: clamp(16px, 3vh, 30px);
+  transform: translateX(-50%);
+  display: flex; align-items: center; gap: 6px;
+  background: var(--panel-bg);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--panel-line);
+  border-radius: 2px; padding: 6px;
+  /* left:50% 会把可用宽度压成半屏,绝对定位元素据此收缩换行 —— 故显式取内容宽 */
+  width: max-content; max-width: calc(100vw - 32px);
+  flex-wrap: wrap; justify-content: center;
+}
+.hud-bar .sep { width: 1px; align-self: stretch; background: var(--panel-line); margin: 2px 5px; }
+.hud-bar button {
+  font-family: var(--serif); font-size: 14px; letter-spacing: .12em;
+  font-weight: 700;
+  color: var(--plaster-dim); background: none;
+  border: 1px solid transparent; border-radius: 2px;
+  padding: 7px 13px; cursor: pointer;
+  transition: color .2s ease, background .2s ease, border-color .2s ease;
+  min-width: 40px;
+}
+.hud-bar button:hover { color: var(--plaster); background: rgba(255,255,255,.05); }
+.hud-bar button[aria-pressed="true"],
+.hud-bar button[aria-current="true"] {
+  color: var(--ink); background: var(--plaster); border-color: var(--plaster);
+}
+.hud-bar button:focus-visible,
+.hud-part > button:focus-visible,
+.hud-part .statue-floor-head:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+/* 提示行 ───────────────────────────────────────────────── */
+.hud-hint {
+  position: absolute; left: 50%; bottom: calc(clamp(16px, 3vh, 30px) + 62px);
+  transform: translateX(-50%);
+  /* 11.5px 太小,读不清 —— 提到 15px,字距同步收一点 */
+  font-size: 15px; letter-spacing: .12em; color: var(--plaster);
+  text-shadow: 0 1px 10px rgba(0,0,0,.8); white-space: nowrap;
+  width: max-content; transition: opacity .3s ease;
+}
+
+/* 帮助 / 来源浮层 ──────────────────────────────────────── */
+.hud-sheet {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  /* 叙事面板与底栏都带 z-index: 2,遮罩不写就会被它们压在下面 —— 实测如此 */
+  z-index: 20;
+  background: rgba(12,10,8,.72); backdrop-filter: blur(6px);
+  opacity: 0; pointer-events: none; transition: opacity .3s ease;
+}
+.hud-sheet[data-open] { opacity: 1; pointer-events: auto; }
+.hud-sheet .inner {
+  width: min(560px, 88vw); max-height: 78vh; overflow: auto;
+  background: var(--ink-soft); border: 1px solid var(--panel-line);
+  border-radius: var(--radius); padding: 28px 30px 26px;
+}
+.hud-sheet h2 {
+  margin: 0 0 18px; font-family: var(--serif); font-weight: 500;
+  font-size: 20px; letter-spacing: .14em;
+}
+.hud-sheet .keys { display: grid; grid-template-columns: auto 1fr; gap: 9px 20px; font-size: 13px; }
+.hud-sheet .keys dt {
+  font-family: var(--serif); color: var(--gold); letter-spacing: .1em; white-space: nowrap;
+}
+.hud-sheet .keys dd { margin: 0; color: var(--plaster-dim); }
+.hud-sheet ul { margin: 14px 0 0; padding-left: 18px; font-size: 12.5px; line-height: 1.95; color: var(--plaster-dim); }
+/* 场景说明:比键位表松一档,和「资料来源」那张清单区分开 */
+.hud-sheet .scene-notes {
+  margin-top: 18px; padding-top: 15px; border-top: 1px solid var(--panel-line);
+  font-size: 13px; line-height: 2.0;
+}
+.hud-sheet .scene-notes li { margin-bottom: 7px; }
+.hud-sheet .scene-notes b { font-weight: 600; color: var(--plaster); }
+.hud-sheet .note {
+  margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--panel-line);
+  font-size: 12px; line-height: 1.9; color: var(--plaster-dim);
+}
+.hud-sheet .author {
+  margin: 0 0 12px; font-size: 12.5px; line-height: 1.9; color: var(--plaster-dim);
+}
+.hud-sheet .author b {
+  display: block; margin-bottom: 4px;
+  font-family: var(--serif); font-weight: 600; font-size: 13.5px;
+  letter-spacing: .08em; color: var(--plaster);
+}
+.hud-sheet .tags { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 12px; font-size: 12px; }
+.hud-sheet .tags span b {
+  font-family: var(--serif); font-weight: 500; color: var(--gold); margin-right: 5px;
+}
+.hud-sheet .close {
+  margin-top: 22px; font-family: var(--serif); font-size: 14px; letter-spacing: .14em;
+  background: none; border: 1px solid var(--panel-line); border-radius: 2px;
+  color: var(--plaster); padding: 8px 20px; cursor: pointer;
+}
+.hud-sheet .close:hover { background: rgba(255,255,255,.06); }
+
+/* 分解视图的层标签 ─────────────────────────────────────── */
+.hud-panel[data-dim] { opacity: .0; pointer-events: none; }
+
+/* 开发期相机调试面板 ───────────────────────────────────── */
+.camera-tuner {
+  position: absolute;
+  left: clamp(14px, 2vw, 28px);
+  bottom: clamp(88px, 11vh, 118px);
+  width: min(412px, calc(100vw - 28px));
+  max-height: calc(100vh - 132px);
+  overflow: auto;
+  background: color-mix(in srgb, var(--ink) 88%, transparent);
+  backdrop-filter: blur(14px) saturate(1.08);
+  border: 1px solid var(--panel-line);
+  border-left: 2px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 13px 14px 14px;
+  box-shadow: 0 12px 28px rgba(0,0,0,.28);
+}
+.camera-tuner[hidden] { display: none; }
+.camera-tuner-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin-bottom: 9px;
+}
+.camera-tuner h2 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: .12em;
+}
+.camera-tuner-icon {
+  border: 0;
+  background: none;
+  color: var(--plaster-dim);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 3px 5px;
+}
+.camera-tuner-icon:hover { color: var(--plaster); }
+.camera-tuner-slots {
+  display: grid;
+  grid-template-columns: 58px repeat(5, minmax(0, 1fr));
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 10px;
+}
+.camera-tuner-slots span {
+  color: var(--plaster-dim);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.camera-tuner-slots button {
+  position: relative;
+  border: 1px solid var(--panel-line);
+  border-radius: 2px;
+  background: rgba(230,221,202,.06);
+  color: var(--plaster-dim);
+  font: 12px var(--serif);
+  letter-spacing: .08em;
+  padding: 5px 4px;
+  cursor: pointer;
+}
+.camera-tuner-slots button:hover {
+  color: var(--plaster);
+  background: rgba(230,221,202,.11);
+}
+.camera-tuner-slots button[data-active] {
+  color: var(--ink);
+  background: var(--gold);
+  border-color: var(--gold);
+}
+.camera-tuner-slots button[data-recorded]::after {
+  content: "";
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--plaster);
+  box-shadow: 0 0 0 1px rgba(20,17,14,.45);
+}
+.camera-tuner-grid {
+  display: grid;
+  gap: 7px;
+}
+.camera-tuner-row {
+  display: grid;
+  grid-template-columns: 56px minmax(120px, 1fr) 72px;
+  align-items: center;
+  gap: 9px;
+}
+.camera-tuner-label {
+  font-size: 12px;
+  color: var(--plaster-dim);
+  white-space: nowrap;
+}
+.camera-tuner input[type="range"] {
+  width: 100%;
+  accent-color: var(--gold);
+}
+.camera-tuner input[type="number"] {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--panel-line);
+  border-radius: 2px;
+  background: rgba(230,221,202,.08);
+  color: var(--plaster);
+  font: 12px var(--sans);
+  padding: 4px 5px;
+  font-variant-numeric: tabular-nums;
+}
+.camera-tuner-output {
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 10px;
+  resize: vertical;
+  min-height: 116px;
+  border: 1px solid var(--panel-line);
+  border-radius: 2px;
+  background: rgba(20,17,14,.62);
+  color: var(--plaster-dim);
+  font: 11.5px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  padding: 8px;
+}
+.camera-tuner-actions {
+  display: flex; flex-wrap: wrap; gap: 7px;
+  margin-top: 9px;
+}
+.camera-tuner-actions button {
+  border: 1px solid var(--panel-line);
+  border-radius: 2px;
+  background: rgba(230,221,202,.08);
+  color: var(--plaster);
+  font: 12px var(--serif);
+  letter-spacing: .08em;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.camera-tuner-actions button:hover { background: rgba(230,221,202,.14); }
+.camera-tuner-status {
+  min-height: 1.4em;
+  margin: 7px 0 0;
+  color: var(--gold);
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+
+/* 移动端 ───────────────────────────────────────────────── */
+@media (max-width: 760px) {
+  .hud-title h1 { font-size: 28px; }
+  .hud-title .meta { display: none; }
+  .hud-panel {
+    top: auto; bottom: 128px; right: 12px; left: 12px; width: auto;
+    max-height: 34vh; overflow: auto; padding: 15px 16px;
+  }
+  .hud-part { bottom: 128px; left: 12px; right: 12px; width: auto; }
+  .hud-part[data-kind="statue"] {
+    top: auto; bottom: 128px; left: 12px; right: 12px; width: auto;
+    max-height: 40vh; overflow: auto;
+  }
+  .hud-part.statue-detail-card {
+    top: auto; bottom: 128px; left: 12px; right: 12px; width: auto;
+    max-height: 48vh;
+  }
+  .hud-part .statue-image-grid,
+  .hud-part .statue-floor-facts { grid-template-columns: 1fr; }
+  .hud-part .statue-image img { height: 118px; }
+  .hud-statue-guides { display: none; }
+  .image-lightbox { padding: 16px; }
+  .image-lightbox-inner { max-width: 94vw; max-height: 88vh; }
+  .image-lightbox-inner img { max-height: calc(88vh - 48px); }
+  .camera-tuner {
+    left: 12px; right: 12px; bottom: 128px; width: auto;
+    max-height: 48vh;
+  }
+  .camera-tuner-slots { grid-template-columns: 1fr repeat(5, minmax(34px, 1fr)); }
+  .camera-tuner-row { grid-template-columns: 52px minmax(90px, 1fr) 68px; }
+  .hud-bar { width: calc(100vw - 24px); }
+  .hud-bar button { font-size: 13px; padding: 6px 10px; min-width: 34px; }
+  .hud-hint { display: none; }
+}
+
+@media (min-width: 761px) and (max-width: 1180px) {
+  .hud-part[data-kind="statue"],
+  .hud-part.statue-detail-card {
+    width: 330px;
+    left: 24px;
+    right: auto;
+    top: 28px;
+    bottom: 92px;
+    padding: 21px 22px 23px;
+  }
+  .hud-part[data-kind="statue"] {
+    left: auto;
+    right: 24px;
+  }
+  .hud-part h3 { font-size: 22px; }
+  .hud-part p { font-size: 13.5px; line-height: 1.9; }
+  .hud-part .statue-floor-plan,
+  .hud-part .statue-floor-plan svg { width: 36px; height: 36px; }
+  .hud-part .statue-floor-index { min-width: 34px; padding-left: 12px; }
+}
+
+@media (min-width: 761px) and (max-height: 780px) {
+  .hud-part[data-kind="statue"],
+  .hud-part.statue-detail-card {
+    top: 22px;
+    bottom: 84px;
+    padding-top: 18px;
+    padding-bottom: 18px;
+  }
+  .hud-part[data-kind="statue"] .statue-visual {
+    margin: 10px 0 12px;
+    padding: 7px 8px 8px;
+  }
+  .hud-part[data-kind="statue"] .statue-visual svg { height: 118px; }
+  .hud-part[data-kind="statue"] .statue-visual figcaption {
+    font-size: 11.8px;
+    line-height: 1.45;
+  }
+  .hud-part[data-kind="statue"] .statue-floor-sections.is-compact { margin-top: 12px; }
+  .hud-part[data-kind="statue"] .statue-floor-sections.is-compact .statue-floor-card,
+  .hud-part[data-kind="statue"] .statue-floor-sections.is-compact .statue-floor-head {
+    min-height: 58px;
+  }
+  .hud-part[data-kind="statue"] .statue-floor-plan,
+  .hud-part[data-kind="statue"] .statue-floor-plan svg {
+    width: 34px;
+    height: 34px;
+  }
+}
+
+/* 动效降级 ─────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
+
+/* 斗拱特写的构件标注 ───────────────────────────────────── */
+.hud-labels {
+  position: absolute; inset: 0; pointer-events: none;
+  opacity: 0; transition: opacity .5s ease;
+}
+.hud-labels[data-open] { opacity: 1; }
+.hud-label {
+  position: absolute; top: 0; left: 0;
+  display: flex; align-items: center; gap: 7px;
+  white-space: nowrap; transform-origin: left center;
+  font-size: 12.5px; color: var(--plaster);
+  text-shadow: 0 1px 8px rgba(0,0,0,.9);
+  will-change: transform;
+}
+.hud-label i {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--gold); box-shadow: 0 0 0 3px rgba(201,162,39,.18);
+  flex: none;
+}
+.hud-label span { font-family: var(--serif); letter-spacing: .1em; }
+.hud-label em {
+  font-style: normal; font-size: 10.5px; letter-spacing: .16em;
+  color: var(--gold); opacity: .85;
+}
+
+.hud-craft-entry {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 3;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid color-mix(in srgb, var(--gold) 54%, transparent);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--ink) 82%, transparent);
+  color: var(--plaster);
+  font-family: var(--serif);
+  font-size: 15px;
+  letter-spacing: .12em;
+  line-height: 1;
+  white-space: nowrap;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 26px rgba(0,0,0,.28);
+  cursor: pointer;
+  opacity: 0;
+  translate: -50% -50%;
+  transition: opacity .25s ease, background .2s ease, border-color .2s ease;
+}
+.hud-craft-entry::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--gold);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--gold) 80%, transparent);
+}
+.hud-craft-entry[data-open] {
+  display: inline-flex;
+  opacity: 1;
+}
+.hud-craft-entry:hover {
+  background: color-mix(in srgb, var(--wood) 58%, var(--ink));
+  border-color: var(--gold);
+}
+.hud-craft-entry:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
